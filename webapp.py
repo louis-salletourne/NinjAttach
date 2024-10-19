@@ -4,6 +4,7 @@ import json
 import os
 from pdf.export_missing_fields import export_missing_fields
 import tempfile
+from email_read import read_email
 
 # JSON file path
 json_file_path = "user_profile.json"
@@ -25,8 +26,16 @@ def save_json(data):
 
 # Main Streamlit app
 def main():
+    output = read_email()
     st.title("PDF Info Extractor")
     st.write("Upload a PDF file and I'll extract information, then fill in the missing details.")
+    print(output)
+    attachments = output['Attachments']
+    if not attachments:
+        st.write("No attachments found.")
+        return
+    path = attachments[0]
+    st.write("Saved attachment:", path)
 
     # Load current user profile
     user_profile = load_json()
@@ -37,44 +46,34 @@ def main():
         st.json(user_profile)
     else:
         st.write("No user profile found.")
+    extracted_info = export_missing_fields(path)
+    st.write(extracted_info)
 
-    # File uploader
-    uploaded_pdf = st.file_uploader("Upload PDF", type="pdf")
+    # Display extracted information and find missing information
+    st.subheader("Extracted Information")
+    missing_info = {}
+    user_inputs = {}
 
-    if uploaded_pdf is not None:
-        st.write("Processing PDF...")
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
-            temp_pdf.write(uploaded_pdf.read())
-            temp_pdf_path = temp_pdf.name  # Get the file path
-            extracted_info = export_missing_fields(temp_pdf_path)
-            st.write(extracted_info)
+    for key, value in extracted_info.items():
+        if key not in user_profile or user_profile[key] is None:
+            if value is None:
+                # Create text input for missing information
+                user_inputs[key] = st.text_input(f"Please provide your {key.replace('_', ' ').capitalize()}:")
+            else:
+                st.write(f"{key.replace('_', ' ').capitalize()}: {value}")
+        else:
+            st.write(f"{key.replace('_', ' ').capitalize()}: {user_profile[key]}")
 
-            # Display extracted information and find missing information
-            st.subheader("Extracted Information")
-            missing_info = {}
-            user_inputs = {}
+    # Submit button to update missing information
+    if st.button("Submit"):
+        for key, user_input in user_inputs.items():
+            if user_input:
+                user_profile[key] = user_input
+        save_json(user_profile)
 
-            for key, value in extracted_info.items():
-                if key not in user_profile or user_profile[key] is None:
-                    if value is None:
-                        # Create text input for missing information
-                        user_inputs[key] = st.text_input(f"Please provide your {key.replace('_', ' ').capitalize()}:")
-                    else:
-                        st.write(f"{key.replace('_', ' ').capitalize()}: {value}")
-                else:
-                    st.write(f"{key.replace('_', ' ').capitalize()}: {user_profile[key]}")
-
-            # Submit button to update missing information
-            if st.button("Submit"):
-                for key, user_input in user_inputs.items():
-                    if user_input:
-                        user_profile[key] = user_input
-                save_json(user_profile)
-
-                st.success("User profile updated successfully!")
-                st.json(user_profile)
-            
-            os.remove(temp_pdf_path)
+        st.success("User profile updated successfully!")
+        st.json(user_profile)
+    
 
 # Run the app
 if __name__ == "__main__":
