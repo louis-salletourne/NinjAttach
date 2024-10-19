@@ -125,7 +125,7 @@ def get_message_body(payload):
 
 def save_attachment(filename, data):
     """Helper function to save the attachment to the local filesystem."""
-    folder_path = 'attachments'
+    folder_path = 'files'
     
     # Create a folder for attachments if it doesn't exist
     if not os.path.exists(folder_path):
