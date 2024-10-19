@@ -1,16 +1,15 @@
 # Step 3: Fill the Fields Using AI (Example: using a pre-trained GPT model from OpenAI API)
 import json
 
+def to_json(input_string, output_file_path):
+    # Remove the markdown code block syntax
+    json_string = input_string.replace('```json\n', '').replace('\n```', '')
 
-def to_json(missing_file: str, output_path: str):
-    # Step 1: Clean the input string
-    cleaned_string = missing_file.strip("```json\n").strip("```")
+    # Parse the JSON string
+    data = json.loads(json_string)
 
-    # Step 2: Parse the string into a JSON object
-    data = json.loads(cleaned_string)
-
-    # Step 3: Write the JSON object to a file
-    with open(output_path, "w") as json_file:
+    # Write the JSON data to a file
+    with open(output_file_path, 'w') as json_file:
         json.dump(data, json_file, indent=4)
-
     print("JSON file created successfully!")
+    
