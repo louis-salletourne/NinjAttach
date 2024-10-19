@@ -1,7 +1,8 @@
 langchain
 python-dotenv
 google-generativeai
-langchain-google-genaiPyPDF2
+langchain-google-genai
+PyPDF2
 google-generativeai
 reportlab
 google-auth
