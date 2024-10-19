@@ -1,4 +1,4 @@
-# Step 2: Identify Missing Fields (Example: look for placeholders like "_____" or "TBD")
+# Step 2: Identify Missing Fields (Example: look for placeholders like "_" or "TBD")
 import google.generativeai as genai
 from google.generativeai.types import HarmBlockThreshold, HarmCategory
 
@@ -13,7 +13,7 @@ def identify_missing_fields(sample_file: str, size: list, metadata: dict):
             sample_file,
             f"""
             I need a JSON string that accurately identifies and locates all missing fields within a given document.
-            To help you, I give you the size of the document : {size[1]} x {size[0]}.
+            To help you, I give you the size of the original document : {size[0]} x {size[1]}.
             And the metadata of the document : {metadata}.
             For each missing field, please provide the following information:
 
@@ -29,6 +29,9 @@ def identify_missing_fields(sample_file: str, size: list, metadata: dict):
         safety_settings={
             HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
             HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
+            HarmCategory.HARM_CATEGORY_UNSPECIFIED: HarmBlockThreshold.BLOCK_NONE,
         },
     )
 
