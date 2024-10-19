@@ -1,2 +1,10 @@
-PyPDF2
+langchain
+python-dotenv
 google-generativeai
+langchain-google-genaiPyPDF2
+google-generativeai
+reportlab
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
