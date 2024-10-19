@@ -2,3 +2,4 @@ test.ipynb
 __pycache__
 output.json
 config.py
+.DS_Store
