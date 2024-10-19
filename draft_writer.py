@@ -4,6 +4,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import shutil
 
 def create_draft(service, sender, subject, completed_file):
     """Create and send a draft with an attachment."""
@@ -35,3 +36,17 @@ def create_draft(service, sender, subject, completed_file):
     draft = service.users().drafts().create(userId='me', body=create_message).execute()
     
     print(f"Draft created: {draft['id']}")
+
+def copy_to_completed_files(file_path):
+    """Copy the PDF to the completed_files folder and rename it."""
+    completed_folder = 'completed_files'
+    if not os.path.exists(completed_folder):
+        os.makedirs(completed_folder)
+
+    filename = os.path.basename(file_path)
+    new_filename = filename.replace(".pdf", "_completed.pdf")
+    new_path = os.path.join(completed_folder, new_filename)
+
+    shutil.copy(file_path, new_path)
+    print(f"File copied to: {new_path}")
+    return new_path

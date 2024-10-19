@@ -1,7 +1,6 @@
 import os.path
 import json
 import base64
-import shutil
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -12,7 +11,7 @@ from draft_writer import create_draft  # Importing the create_draft function
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
 
-def main():
+def read_email():
     """Shows basic usage of the Gmail API.
     Lists the user's Gmail labels and reads emails.
     """
@@ -38,73 +37,85 @@ def main():
             token.write(creds.to_json().encode())
     
     # If credentials are valid, build the Gmail API service
-    if creds:
-        service = build('gmail', 'v1', credentials=creds)
+    if not creds:
+        print("Authentication failed.")
+        return None
+    
+    service = build('gmail', 'v1', credentials=creds)
 
-        # Search query to find all emails received during a time
-        # Format: after:2023/09/30 before:2023/11/01
-        # query = 'after:2024/09/30 before:2024/11/01'
+    # Search query to find all emails received during a time
+    # Format: after:2023/09/30 before:2023/11/01
+    # query = 'after:2024/09/30 before:2024/11/01'
 
-        # Get the user's inbox and retrieve emails based on the query
-        results = service.users().messages().list(userId='me', q='', maxResults=1).execute()
-        messages = results.get('messages', [])
+    # Get the user's inbox and retrieve emails based on the query
+    results = service.users().messages().list(userId='me', q='', maxResults=1).execute()
+    messages = results.get('messages', [])
 
-        if not messages:
-            print("No messages found.")
-        else:
-            # Get the message ID
-            message_id = messages[0]['id']
+    if not messages:
+        print("No messages found.")
+        return None
+    # Get the message ID
+    message_id = messages[0]['id']
 
-            # Use the message ID to get the email details
-            message_data = service.users().messages().get(userId='me', id=message_id, format='full').execute()
+    # Use the message ID to get the email details
+    message_data = service.users().messages().get(userId='me', id=message_id, format='full').execute()
 
-            # Extract information from the email headers
-            headers = message_data['payload']['headers']
-            subject = get_header(headers, 'Subject')
-            sender = get_header(headers, 'From')
-            recipient = get_header(headers, 'To')
-            date = get_header(headers, 'Date')
+    # Extract information from the email headers
+    headers = message_data['payload']['headers']
+    subject = get_header(headers, 'Subject')
+    sender = get_header(headers, 'From')
+    recipient = get_header(headers, 'To')
+    date = get_header(headers, 'Date')
 
-            # Extract the email body
-            email_body = get_message_body(message_data['payload'])
+    # Extract the email body
+    email_body = get_message_body(message_data['payload'])
 
-            # Check for attachments
-            attachments = []
-            if 'parts' in message_data['payload']:
-                for part in message_data['payload']['parts']:
-                    if part.get('filename'):  # Attachment is present
-                        attachment_id = part['body']['attachmentId']
-                        attachment = service.users().messages().attachments().get(userId='me', messageId=message_id, id=attachment_id).execute()
-                        file_data = base64.urlsafe_b64decode(attachment['data'].encode('UTF-8'))
+    # Check for attachments
+    attachments = []
+    if 'parts' in message_data['payload']:
+        for part in message_data['payload']['parts']:
+            if part.get('filename'):  # Attachment is present
+                attachment_id = part['body']['attachmentId']
+                attachment = service.users().messages().attachments().get(userId='me', messageId=message_id, id=attachment_id).execute()
+                file_data = base64.urlsafe_b64decode(attachment['data'].encode('UTF-8'))
 
-                        # Save the attachment
-                        attachment_file = save_attachment(part['filename'], file_data)
-                        attachments.append(attachment_file)
+                # Save the attachment
+                attachment_file = save_attachment(part['filename'], file_data)
+                attachments.append(attachment_file)
 
-                        # Copy the PDF to the completed_files folder
-                        completed_file = copy_to_completed_files(attachment_file)
+                # Copy the PDF to the completed_files folder
+                # completed_file = copy_to_completed_files(attachment_file)
 
-                        # Create draft reply with the updated PDF attached
-                        create_draft(service, sender, subject, completed_file)
+                # Create draft reply with the updated PDF attached
+                # create_draft(service, sender, subject, completed_file)
 
 
-            # Decode the email body (Base64 encoded)
-            if email_body:
-                decoded_body = base64.urlsafe_b64decode(email_body).decode('utf-8')
-            else:
-                decoded_body = "(No body content)"
+    # Decode the email body (Base64 encoded)
+    if email_body:
+        decoded_body = base64.urlsafe_b64decode(email_body).decode('utf-8')
+    else:
+        decoded_body = "(No body content)"
 
-            # Output the email details
-            print(f"From: {sender}")
-            print(f"To: {recipient}")
-            print(f"Date: {date}")
-            print(f"Subject: {subject}")
-            print(f"Body: {decoded_body}")
-            if attachments:
-                print("Attachments:", attachments)
-            else:
-                print("No attachments found.")
-            print("\n" + "="*50 + "\n")  # Separator between emails
+    # Output the email details
+    print(f"From: {sender}")
+    print(f"To: {recipient}")
+    print(f"Date: {date}")
+    print(f"Subject: {subject}")
+    print(f"Body: {decoded_body}")
+    if attachments:
+        print("Attachments:", attachments)
+    else:
+        print("No attachments found.")
+    print("\n" + "="*50 + "\n")  # Separator between emails
+    output = {
+        "From": sender,
+        "To": recipient,
+        "Date": date,
+        "Subject": subject,
+        "Body": decoded_body,
+        "Attachments": attachments
+    }
+    return output
 
 def get_header(headers, name):
     """Helper function to retrieve header values."""
@@ -138,23 +149,3 @@ def save_attachment(filename, data):
     
     print(f"Attachment saved: {file_path}")
     return file_path
-
-
-
-def copy_to_completed_files(file_path):
-    """Copy the PDF to the completed_files folder and rename it."""
-    completed_folder = 'completed_files'
-    if not os.path.exists(completed_folder):
-        os.makedirs(completed_folder)
-
-    filename = os.path.basename(file_path)
-    new_filename = filename.replace(".pdf", "_completed.pdf")
-    new_path = os.path.join(completed_folder, new_filename)
-
-    shutil.copy(file_path, new_path)
-    print(f"File copied to: {new_path}")
-    return new_path
-
-
-if __name__ == '__main__':
-    main()
