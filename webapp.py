@@ -2,21 +2,7 @@ import streamlit as st
 import json
 import os
 from pdf.export_missing_fields import export_missing_fields
-from email_read import read_email
-from email_read import create_draft
-from email_read import copy_to_completed_files
-
-
-
-### API key Alice ###
-
-import google.generativeai as genai
-# Use your existing Google API key
-genai.configure(api_key="AIzaSyAu7GzfTR3x3d2B5e8XlzTmFNgh2J0X4mE")
-
-### API key Alice ###
-
-
+from email_read import read_email, create_draft
 
 # JSON file path
 json_file_path = "user_profile.json"
@@ -33,13 +19,11 @@ def save_json(data):
     with open(json_file_path, 'w') as f:
         json.dump(data, f, indent=4)
 
-
 # Main Streamlit app
 def main():
     st.title("Email Agent - Powered by Gemini AI")
     st.write("Fetching the latest email...")
     output = read_email()
-    print(output)
     
     attachments = output['Attachments']
     if not attachments:
@@ -67,35 +51,32 @@ def main():
     st.subheader("Fill in the missing fields:")
     
     # Create a dictionary to hold user inputs
-    new_info = {}
-    
-    # Create text inputs for each missing field
-    for field in extracted_info:
-        new_info[field] = st.text_input(f"Enter {field}:")
 
-    # Submit button to update the JSON file
-    if st.button("Submit"):
-        # Update user profile with new info
-        user_profile.update(new_info)
-        
-        # Save the updated user profile
+    with st.form(key='info_form'):
+        user_inputs = {}
+        for field in extracted_info:
+            user_inputs[field] = st.text_input(f"Please provide your {field}")
+
+        # Submit button
+        submitted = st.form_submit_button(label='Submit')
+
+# Only run this when the form is submitted
+    if submitted:
+        # Add provided info to the user profile
+        user_profile.update(user_inputs)
+
+        # Save the updated profile to the JSON file
         save_json(user_profile)
-        
-        st.success("User profile updated successfully!")
-        st.json(user_profile)
-    
-    # Copy the PDF to the completed_files folder
-    completed_file = copy_to_completed_files(path)
 
-    # Create draft reply with the updated PDF attached
-    service=output['service']
-    sender=output['From']
-    subject=output['Subject']
-    create_draft(service, sender, subject, completed_file)
+        st.success("Profile updated successfully!")
+        st.json(user_profile)  # Display updated profile
 
-    
-    
+        # complete_pdf(original_pdf_path, user_profile) -> outputs a new PDF with the missing fields filled in and returns the path to the new PDF
 
-# Run the app
+        create_draft(output, "files/certificate_of_presence_erasmus_2023-2024 (1)_completed.pdf")
+
+        st.write("Draft email created with the updated PDF attached.")
+        st.stop()
+
 if __name__ == "__main__":
     main()
