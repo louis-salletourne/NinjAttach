@@ -12,6 +12,10 @@ def cached_read_email():
     return read_email()
 
 @st.cache_resource
+def cached_create_draft(_output, completed_file):
+    return create_draft(_output, completed_file)
+
+@st.cache_resource
 def cached_found_and_missing_fields(user_profile,path):
     missing_fields = export_missing_fields(path)
     return found_and_missing_infos(user_profile, missing_fields)
@@ -92,8 +96,6 @@ def main():
 
     # Only process the form when submitted
     if submitted:
-        # Debugging: Print user_inputs to see if values are captured
-        st.write("User inputs:", user_inputs)
 
         # Add only non-empty user-provided info to the user profile
         for field, value in user_inputs.items():
@@ -119,8 +121,7 @@ def main():
         _ = fill_missing_fields(pdf_path = pdf_path, user_profile = user_profile, output_file_name = output_file_name)
 
         # Call function to create an email draft with the updated PDF attached
-        create_draft(output, output_file_name)
-
+        cached_create_draft(output, output_file_name)
         st.write("Draft email created with the updated PDF attached.")
 
 

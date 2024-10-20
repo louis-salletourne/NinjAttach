@@ -206,20 +206,3 @@ def create_draft(output, completed_file):
     draft = output['service'].users().drafts().create(userId='me', body=create_message).execute()
     
     print(f"Draft created: {draft['id']}")
-
-
-
-
-def copy_to_completed_files(file_path):
-    """Copy the PDF to the completed_files folder and rename it."""
-    completed_folder = 'completed_files'
-    if not os.path.exists(completed_folder):
-        os.makedirs(completed_folder)
-
-    filename = os.path.basename(file_path)
-    new_filename = filename.replace(".pdf", "_completed.pdf")
-    new_path = os.path.join(completed_folder, new_filename)
-
-    shutil.copy(file_path, new_path)
-    print(f"File copied to: {new_path}")
-    return new_path
