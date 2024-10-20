@@ -41,7 +41,15 @@ def IndirectObject(*args):
 
 # Main Streamlit app
 def main():
+        # Set the favicon and page title
+    st.set_page_config(
+        page_title="Email Agent - Powered by Gemini AI",
+        page_icon="images/WhatsApp Image 2024-10-20 at 02.56.05.jpeg",  # Adjust the path as needed
+        layout="wide"
+    )
+
     st.title("Email Agent - Powered by Gemini AI")
+    
     st.write("Fetching the latest email...")
 
     # Create tabs
