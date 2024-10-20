@@ -1,10 +1,22 @@
 import streamlit as st
-import PyPDF2
 import json
 import os
 from pdf.export_missing_fields import export_missing_fields
-import tempfile
 from email_read import read_email
+from email_read import create_draft
+from email_read import copy_to_completed_files
+
+
+
+### API key Alice ###
+
+import google.generativeai as genai
+# Use your existing Google API key
+genai.configure(api_key="AIzaSyAu7GzfTR3x3d2B5e8XlzTmFNgh2J0X4mE")
+
+### API key Alice ###
+
+
 
 # JSON file path
 json_file_path = "user_profile.json"
@@ -21,21 +33,22 @@ def save_json(data):
     with open(json_file_path, 'w') as f:
         json.dump(data, f, indent=4)
 
-# Dummy function to simulate extraction of information from PDF
-
 
 # Main Streamlit app
 def main():
+    st.title("Email Agent - Powered by Gemini AI")
+    st.write("Fetching the latest email...")
     output = read_email()
-    st.title("PDF Info Extractor")
-    st.write("Upload a PDF file and I'll extract information, then fill in the missing details.")
     print(output)
+    
     attachments = output['Attachments']
     if not attachments:
         st.write("No attachments found.")
         return
+
+    # Consider the first attachment
     path = attachments[0]
-    st.write("Saved attachment:", path)
+    st.write("Found and saved PDF attachement")
 
     # Load current user profile
     user_profile = load_json()
@@ -46,33 +59,41 @@ def main():
         st.json(user_profile)
     else:
         st.write("No user profile found.")
-    extracted_info = export_missing_fields(path)
-    st.write(extracted_info)
+    
+    # Extract missing fields
+    extracted_info = export_missing_fields(path)  # extracted_info is a list of strings (missing fields)
 
-    # Display extracted information and find missing information
-    st.subheader("Extracted Information")
-    missing_info = {}
-    user_inputs = {}
+    # Create a form for the user to fill in missing fields
+    st.subheader("Fill in the missing fields:")
+    
+    # Create a dictionary to hold user inputs
+    new_info = {}
+    
+    # Create text inputs for each missing field
+    for field in extracted_info:
+        new_info[field] = st.text_input(f"Enter {field}:")
 
-    for key, value in extracted_info.items():
-        if key not in user_profile or user_profile[key] is None:
-            if value is None:
-                # Create text input for missing information
-                user_inputs[key] = st.text_input(f"Please provide your {key.replace('_', ' ').capitalize()}:")
-            else:
-                st.write(f"{key.replace('_', ' ').capitalize()}: {value}")
-        else:
-            st.write(f"{key.replace('_', ' ').capitalize()}: {user_profile[key]}")
-
-    # Submit button to update missing information
+    # Submit button to update the JSON file
     if st.button("Submit"):
-        for key, user_input in user_inputs.items():
-            if user_input:
-                user_profile[key] = user_input
+        # Update user profile with new info
+        user_profile.update(new_info)
+        
+        # Save the updated user profile
         save_json(user_profile)
-
+        
         st.success("User profile updated successfully!")
         st.json(user_profile)
+    
+    # Copy the PDF to the completed_files folder
+    completed_file = copy_to_completed_files(path)
+
+    # Create draft reply with the updated PDF attached
+    service=output['service']
+    sender=output['From']
+    subject=output['Subject']
+    create_draft(service, sender, subject, completed_file)
+
+    
     
 
 # Run the app

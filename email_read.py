@@ -5,7 +5,11 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from draft_writer import create_draft  # Importing the create_draft function
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
+import shutil
 
 
 # If modifying these SCOPES, delete the file token.json.
@@ -45,15 +49,16 @@ def read_email():
 
     # Search query to find all emails received during a time
     # Format: after:2023/09/30 before:2023/11/01
-    # query = 'after:2024/09/30 before:2024/11/01'
+    query = 'in:inbox'
 
     # Get the user's inbox and retrieve emails based on the query
-    results = service.users().messages().list(userId='me', q='', maxResults=1).execute()
+    results = service.users().messages().list(userId='me', q=query, maxResults=1).execute()
     messages = results.get('messages', [])
 
     if not messages:
         print("No messages found.")
         return None
+    
     # Get the message ID
     message_id = messages[0]['id']
 
@@ -83,12 +88,6 @@ def read_email():
                 attachment_file = save_attachment(part['filename'], file_data)
                 attachments.append(attachment_file)
 
-                # Copy the PDF to the completed_files folder
-                # completed_file = copy_to_completed_files(attachment_file)
-
-                # Create draft reply with the updated PDF attached
-                # create_draft(service, sender, subject, completed_file)
-
 
     # Decode the email body (Base64 encoded)
     if email_body:
@@ -113,7 +112,8 @@ def read_email():
         "Date": date,
         "Subject": subject,
         "Body": decoded_body,
-        "Attachments": attachments
+        "Attachments": attachments,
+        "service": service,
     }
     return output
 
@@ -149,3 +149,49 @@ def save_attachment(filename, data):
     
     print(f"Attachment saved: {file_path}")
     return file_path
+
+
+def create_draft(service, sender, subject, completed_file):
+    """Create and send a draft with an attachment."""
+    
+    # Create the MIME message
+    message = MIMEMultipart()
+    message['to'] = sender  # Send it back to the original sender
+    message['from'] = 'me'  # The authorized user (you)
+    message['subject'] = f"Re: {subject}"  # Reply to the original subject
+    
+    # Add email body (plain text)
+    msg_text = MIMEText("Please find the completed document attached.")
+    message.attach(msg_text)
+    
+    # Attach the PDF file
+    with open(completed_file, 'rb') as f:
+        mime_base = MIMEBase('application', 'pdf')
+        mime_base.set_payload(f.read())
+        encoders.encode_base64(mime_base)  # Encode the file as Base64
+    
+    mime_base.add_header('Content-Disposition', f'attachment; filename="{os.path.basename(completed_file)}"')
+    message.attach(mime_base)
+    
+    # Convert the message to a raw string
+    raw_message = base64.urlsafe_b64encode(message.as_bytes()).decode('utf-8')
+    
+    # Create the draft with the encoded message
+    create_message = {'message': {'raw': raw_message}}
+    draft = service.users().drafts().create(userId='me', body=create_message).execute()
+    
+    print(f"Draft created: {draft['id']}")
+
+def copy_to_completed_files(file_path):
+    """Copy the PDF to the completed_files folder and rename it."""
+    completed_folder = 'completed_files'
+    if not os.path.exists(completed_folder):
+        os.makedirs(completed_folder)
+
+    filename = os.path.basename(file_path)
+    new_filename = filename.replace(".pdf", "_completed.pdf")
+    new_path = os.path.join(completed_folder, new_filename)
+
+    shutil.copy(file_path, new_path)
+    print(f"File copied to: {new_path}")
+    return new_path
