@@ -9,6 +9,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+
+from dotenv import load_dotenv
+import os
+import google.generativeai as genai
+load_dotenv()
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
 import shutil
 
 
@@ -151,6 +158,16 @@ def save_attachment(filename, data):
     return file_path
 
 
+model = genai.GenerativeModel(model_name="gemini-1.5-pro")
+
+# JSON file path
+json_file_path = "user_profile.json"
+
+# Initialize or load the JSON file
+def load_json():
+    with open(json_file_path, 'r') as f:
+        return json.load(f)
+
 def create_draft(output, completed_file):
     """Create and send a draft with an attachment."""
     
@@ -161,7 +178,15 @@ def create_draft(output, completed_file):
     message['subject'] = f"Re: {output['Subject']}" # Reply to the original subject
     
     # Add email body (plain text)
-    msg_text = MIMEText("Please find the completed document attached.")
+    user_profile=load_json()
+    response= model.generate_content(f"""From: {output['From']} Body:{output['Subject']} 
+                                     This email contains a pdf that I filled with the appropriate info. 
+                                     I want to answer in an email, with the completed file attached. 
+                                     Please write only the body of my email, 
+                                     starting by greeting the recipient using their name, 
+                                     which you should infer from their email address: {output['From']}.
+                                     Sign with my name: {user_profile["Name:"]}.""")
+    msg_text = MIMEText(response.text)
     message.attach(msg_text)
     
     # Attach the PDF file
@@ -181,6 +206,9 @@ def create_draft(output, completed_file):
     draft = output['service'].users().drafts().create(userId='me', body=create_message).execute()
     
     print(f"Draft created: {draft['id']}")
+
+
+
 
 def copy_to_completed_files(file_path):
     """Copy the PDF to the completed_files folder and rename it."""
