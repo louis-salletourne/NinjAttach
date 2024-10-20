@@ -31,11 +31,12 @@ def read_email():
 
     # The file token.json stores the user's access and refresh tokens,
     # and is created automatically when the authorization flow completes for the first time.
-    if os.path.exists('token.json'):
-        with open('token.json', 'r') as token:
-            # Load the file as a dictionary
-            token_data = json.load(token)
-            creds = Credentials.from_authorized_user_info(token_data, SCOPES)
+    # Get the token directly from Streamlit secrets
+    token = st.secrets.get('GMAIL_TOKEN')
+    
+    if token:
+        token_data = json.loads(token)
+        creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
     # If no valid credentials, attempt to get from local env
     if not creds or not creds.valid:
