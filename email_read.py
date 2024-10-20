@@ -49,18 +49,18 @@ def read_email():
                 creds_info = json.loads(creds_json)
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
-                # Use local server method for local development
-                creds = flow.run_local_server(port=0)
-            else:
-                # If not found locally, get credentials from Streamlit secrets (for deployment)
-                creds_json = st.secrets.get('GMAIL_CREDENTIALS')
-                if creds_json:
-                    creds_json = creds_json.replace('\\"', '"')
-                    creds_info = json.loads(creds_json)
-                    flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
+            #     # Use local server method for local development
+            #     creds = flow.run_local_server(port=0)
+            # else:
+            #     # If not found locally, get credentials from Streamlit secrets (for deployment)
+            #     creds_json = st.secrets.get('GMAIL_CREDENTIALS')
+            #     if creds_json:
+            #         creds_json = creds_json.replace('\\"', '"')
+            #         creds_info = json.loads(creds_json)
+            #         flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
-                    # Use console method for cloud deployment
-                    creds = flow.run_console()
+            #         # Use console method for cloud deployment
+                creds = flow.run_console()
 
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
