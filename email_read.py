@@ -56,8 +56,9 @@ def read_email():
             if creds_json:
                 creds_info = json.loads(creds_json)
                 # Use this info to create flow and obtain credentials
-                flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
-                creds = flow.run_local_server(port=0)
+                flow = InstalledAppFlow.from_client_config(creds_info['installed'], SCOPES)
+                # Use the console method for OAuth in a cloud environment
+                creds = flow.run_console()
         # Save the credentials for the next run
         with open('token.json', 'wb') as token:
             token.write(creds.to_json().encode())
