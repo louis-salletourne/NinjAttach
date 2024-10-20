@@ -12,4 +12,5 @@ def to_json(input_string, output_file_path):
     with open(output_file_path, 'w') as json_file:
         json.dump(data, json_file, indent=4)
     print("JSON file created successfully!")
+    return output_file_path
     

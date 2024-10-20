@@ -20,7 +20,7 @@ def identify_missing_fields(sample_file: str, size: list, metadata: dict):
 
             field: The name of the missing field.
            
-            Please ensure the bounding box coordinates are relative to the document's origin.
+            Please ensure the bounding box coordinates are relative to the document's origin. Make sure that the original resolution stays the same when processing the same. 
             Output the response as a valid JSON string.
 
             """

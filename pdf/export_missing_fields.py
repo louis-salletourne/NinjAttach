@@ -1,16 +1,17 @@
 import os
-
-from read_pdf.read_pdf import read_pdf_informations
-from read_pdf.missing_field import identify_missing_fields
-from read_pdf.to_json import to_json
+import json
+from pdf.read_pdf.read_pdf import read_pdf_informations
+from pdf.read_pdf.missing_field import identify_missing_fields
+from pdf.read_pdf.to_json import to_json
 
 pdf_file = "./tests/test_pdf/test/test_1.pdf"
 json_file = "json_file.json"
 
 def export_missing_fields(pdf_file):
     file, size, metadata = read_pdf_informations(pdf_file)
-    json = identify_missing_fields(file, size, metadata)
-    to_json(json, json_file)
+    json_str = identify_missing_fields(file, size, metadata)
+    # print(json)
+    _ = to_json(json_str, json_file)
     with open(json_file, 'r') as file:
         data = json.load(file)
 
