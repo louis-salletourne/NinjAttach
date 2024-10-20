@@ -7,7 +7,7 @@ from gemini_request.gemini_request import found_and_missing_infos
 from gemini_request.clean_fields import clean_fields
 from easy_pdf.fill_missing_files import fill_missing_fields
 from tabs import profile_settings
-from tasks import create_task
+# from tasks import create_task
 GEMINI_API_KEY = st.secrets.get('GEMINI_API_KEY')
 # Set it as an environment variable
 os.environ['GEMINI_API_KEY'] = GEMINI_API_KEY
@@ -128,7 +128,7 @@ def main():
             _ = fill_missing_fields(pdf_path=pdf_path, user_profile=user_profile, output_file_name=output_file_name)
 
             cached_create_draft(output, output_file_name)
-            create_task()
+            # create_task()
             st.write("Draft email created with the updated PDF attached.")
 
     with tab2:
