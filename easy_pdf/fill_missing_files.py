@@ -1,7 +1,7 @@
 import fitz  # PyMuPDF
 from pathlib import Path
 import json  # Import the json module
-output_file_name = 'output.pdf'  # Assuming the output file will also be in the current directory
+output_file_name = 'files/output.pdf'  # Assuming the output file will also be in the current directory
 
 def fill_missing_fields(pdf_path: str, user_profile: dict, output_file_name: str):
     # Load the data from the JSON file
