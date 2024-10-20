@@ -11,6 +11,7 @@ The Email Agent is a Streamlit application designed to automate the process of e
 - **User Profile Management**: Updates the user profile with the extracted information.
 - **Form Generation**: Generates a dynamic form for users to fill in missing information.
 - **Email Draft Creation**: Creates an email draft with the updated PDF attached.
+- **Task Scheduling**: Automatically saves the task in the user’s Google Tasks as a reminder to send the email.
 
 ## Installation
 
