@@ -3,15 +3,9 @@ from pathlib import Path
 import json  # Import the json module
 output_file_name = 'output.pdf'  # Assuming the output file will also be in the current directory
 
-# Load the JSON data from a file
-def load_json_data(json_file_path):
-    with open(json_file_path, 'r') as json_file:
-        return json.load(json_file)
-
-
-def fill_missing_fields(pdf_path: str, json_path: str, output_file_name: str):
+def fill_missing_fields(pdf_path: str, user_profile: dict, output_file_name: str):
     # Load the data from the JSON file
-    entry_data = load_json_data(json_path)
+    entry_data = user_profile
 
     # Open the PDF document
     with fitz.open(pdf_path) as doc:
