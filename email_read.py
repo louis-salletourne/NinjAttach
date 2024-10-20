@@ -14,11 +14,11 @@ import streamlit as st
 from dotenv import load_dotenv
 import os
 import google.generativeai as genai
+
 load_dotenv()
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
 import shutil
-
 
 # If modifying these SCOPES, delete the file token.json.
 SCOPES = ['https://www.googleapis.com/auth/gmail.modify']
@@ -28,40 +28,43 @@ def read_email():
     Lists the user's Gmail labels and reads emails.
     """
     creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first time.
+
+    # The file token.json stores the user's access and refresh tokens,
+    # and is created automatically when the authorization flow completes for the first time.
     if os.path.exists('token.json'):
         with open('token.json', 'r') as token:
             # Load the file as a dictionary
             token_data = json.load(token)
             creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
-    # If no valid credentials, attempt to get from local env or Streamlit secrets
+    # If no valid credentials, attempt to get from local env
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
             # Try to get credentials from the environment for local development
             creds_json = os.environ.get('GMAIL_CREDENTIALS')
-            # Replace escaped quotes with real quotes
-            creds_json = creds_json.replace('\\"', '"')
-            print(creds_json)
+            if creds_json:
+                creds_json = creds_json.replace('\\"', '"')
+                creds_info = json.loads(creds_json)
+                flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
-            if not creds_json:
+                # Use local server method for local development
+                creds = flow.run_local_server(port=0)
+            else:
                 # If not found locally, get credentials from Streamlit secrets (for deployment)
                 creds_json = st.secrets.get('GMAIL_CREDENTIALS')
-                # Replace escaped quotes with real quotes
-                creds_json = creds_json.replace('\\"', '"')
+                if creds_json:
+                    creds_json = creds_json.replace('\\"', '"')
+                    creds_info = json.loads(creds_json)
+                    flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
-            if creds_json:
-                creds_info = json.loads(creds_json)
-                # Use this info to create flow and obtain credentials
-                flow = InstalledAppFlow.from_client_config(creds_info['installed'], SCOPES)
-                # Use the console method for OAuth in a cloud environment
-                creds = flow.run_console()
+                    # Use console method for cloud deployment
+                    creds = flow.run_console()
+
         # Save the credentials for the next run
-        with open('token.json', 'wb') as token:
-            token.write(creds.to_json().encode())
+        with open('token.json', 'w') as token:
+            token.write(creds.to_json())
     
     # If credentials are valid, build the Gmail API service
     if not creds:
