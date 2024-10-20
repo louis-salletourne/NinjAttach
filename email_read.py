@@ -151,14 +151,14 @@ def save_attachment(filename, data):
     return file_path
 
 
-def create_draft(service, sender, subject, completed_file):
+def create_draft(output, completed_file):
     """Create and send a draft with an attachment."""
     
     # Create the MIME message
     message = MIMEMultipart()
-    message['to'] = sender  # Send it back to the original sender
-    message['from'] = 'me'  # The authorized user (you)
-    message['subject'] = f"Re: {subject}"  # Reply to the original subject
+    message['to'] = output['From'] # Send it back to the original sender
+    message['from'] = output['To']  # The authorized user (you)
+    message['subject'] = f"Re: {output['Subject']}" # Reply to the original subject
     
     # Add email body (plain text)
     msg_text = MIMEText("Please find the completed document attached.")
@@ -178,7 +178,7 @@ def create_draft(service, sender, subject, completed_file):
     
     # Create the draft with the encoded message
     create_message = {'message': {'raw': raw_message}}
-    draft = service.users().drafts().create(userId='me', body=create_message).execute()
+    draft = output['service'].users().drafts().create(userId='me', body=create_message).execute()
     
     print(f"Draft created: {draft['id']}")
 
