@@ -1,6 +1,12 @@
 {
-    "Name": "Victor",
-    "Email": "blabla@gmail.com",
+    "Name": "Alice Ternois",
+    "Email": "alice.ternois024@gmail.com",
     "Address": "2299 Piedmont Avenue",
-    "Phone Number": "0758695818"
+    "City": "Berkeley",
+    "State": "CA",
+    "Zip Code": "94720",
+    "Phone Number": "0758695818",
+    "Car identification": "123456789",
+    "Car Year Model": "2023",
+    "Car Make": "Toyota"
 }
