@@ -68,7 +68,7 @@ def read_email():
                 # Button to submit the authorization code
                 if st.button("Submit Authorization Code"):
                     if code:
-                        flow.fetch_token(code=code)
+                        flow.fetch_token(code=code, redirect_uri='https://calhacks-grbn2bpjxgyqw3n2yhcyc7.streamlit.app/')
                         creds = flow.credentials
                         st.success("Authorization successful!")
                     else:
