@@ -55,7 +55,12 @@ def read_email():
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
                 # Get the authorization URL
-                auth_url, _ = flow.authorization_url(prompt='select_account', include_granted_scopes='true')
+                    # Get the authorization URL and redirect URI
+                auth_url, _ = flow.authorization_url(
+                    prompt='select_account', 
+                    include_granted_scopes='true', 
+                    redirect_uri='https://calhacks-grbn2bpjxgyqw3n2yhcyc7.streamlit.app/'
+    )
                 st.write(f"Please visit this URL to authorize the application: [Authorize]({auth_url})")
 
                 # Get the authorization code from the user
