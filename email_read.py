@@ -185,7 +185,7 @@ def create_draft(output, completed_file):
                                      Please write only the body of my email, 
                                      starting by greeting the recipient using their name, 
                                      which you should infer from their email address: {output['From']}.
-                                     Sign with my name: {user_profile["Name:"]}.""")
+                                     Sign with my name: {user_profile["Name"]}.""")
     msg_text = MIMEText(response.text)
     message.attach(msg_text)
     

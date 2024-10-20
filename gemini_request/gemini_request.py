@@ -1,4 +1,3 @@
-import os
 import json
 import google.generativeai as genai
 from google.generativeai.types import HarmBlockThreshold, HarmCategory
