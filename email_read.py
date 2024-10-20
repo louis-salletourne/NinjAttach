@@ -44,6 +44,9 @@ def read_email():
         else:
             # Try to get credentials from the environment for local development
             creds_json = os.environ.get('GMAIL_CREDENTIALS')
+            if creds_json is None:
+                # If not found in the environment, get credentials from Streamlit secrets
+                creds_json = st.secrets.get('GMAIL_CREDENTIALS')
             if creds_json:
                 creds_json = creds_json.replace('\\"', '"')
                 creds_info = json.loads(creds_json)
