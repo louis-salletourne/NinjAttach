@@ -47,13 +47,14 @@ def IndirectObject(*args):
 def main():
         # Set the favicon and page title
     st.set_page_config(
-        page_title="Email Agent - Powered by Gemini AI",
-        page_icon="images/WhatsApp Image 2024-10-20 at 02.56.05.jpeg",  # Adjust the path as needed
+        page_title="NinjAttach",
+        page_icon="images/gallery.jpg",  # Adjust the path as needed
         layout="wide"
     )
 
-    st.title("Email Agent - Powered by Gemini AI")
-    
+    st.title("NinjAttach : Email Agent - Powered by Gemini AI")
+    st.image("images/gallery.jpg", caption="Powered by Gemini AI", use_column_width=True)  # Adjust the path as needed
+
     st.write("Fetching the latest email...")
 
     # Create tabs
