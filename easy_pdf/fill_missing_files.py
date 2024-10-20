@@ -3,7 +3,7 @@ from pathlib import Path
 import json  # Import the json module
 output_file_name = 'files/output.pdf'  # Assuming the output file will also be in the current directory
 
-def fill_missing_fields(pdf_path: str, user_profile: dict, output_file_name: str):
+def fill_missing_fields(pdf_path: str, user_profile: dict, output_file_name: str = output_file_name):
     # Load the data from the JSON file
     entry_data = user_profile
 
