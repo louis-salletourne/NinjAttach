@@ -49,22 +49,24 @@ def read_email():
                 creds_info = json.loads(creds_json)
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
-            #     # Use local server method for local development
-            #     creds = flow.run_local_server(port=0)
-            # else:
-            #     # If not found locally, get credentials from Streamlit secrets (for deployment)
-            #     creds_json = st.secrets.get('GMAIL_CREDENTIALS')
-            #     if creds_json:
-            #         creds_json = creds_json.replace('\\"', '"')
-            #         creds_info = json.loads(creds_json)
-            #         flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
+                # Get the authorization URL
+                auth_url, _ = flow.authorization_url(prompt='select_account')
+                st.write(f"Please visit this URL to authorize the application: [Authorize]({auth_url})")
 
-            #         # Use console method for cloud deployment
-                creds = flow.run_console()
+                # Get the authorization code from the user
+                code = st.text_input("Enter the authorization code:")
+                # Button to submit the authorization code
+                if st.button("Submit Authorization Code"):
+                    if code:
+                        flow.fetch_token(code=code)
+                        creds = flow.credentials
+                        st.success("Authorization successful!")
+                    else:
+                        st.error("Please enter a valid authorization code.")
 
-        # Save the credentials for the next run
-        with open('token.json', 'w') as token:
-            token.write(creds.to_json())
+                    # Save the credentials for the next run
+                    with open('token.json', 'w') as token:
+                        token.write(creds.to_json())
     
     # If credentials are valid, build the Gmail API service
     if not creds:
