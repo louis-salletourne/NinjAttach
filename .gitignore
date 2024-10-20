@@ -11,3 +11,4 @@ files/bill of sale_completed.pdf
 tabs/automatic_response.py
 test_gemini.ipynb
 token.json
+token.pickle
