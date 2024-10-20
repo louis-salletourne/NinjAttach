@@ -48,14 +48,14 @@ def read_email():
                 # If not found in the environment, get credentials from Streamlit secrets
                 creds_json = st.secrets.get('GMAIL_CREDENTIALS')
             if creds_json:
-                st.write(creds_json)
+                # st.write(creds_json)
                 # creds_json = creds_json.replace('\"', '"')
                 creds_info = json.loads(creds_json)
-                st.write(creds_info)
+                # st.write(creds_info)
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
                 # Get the authorization URL
-                auth_url, _ = flow.authorization_url(prompt='select_account')
+                auth_url, _ = flow.authorization_url(prompt='select_account', include_granted_scopes='true')
                 st.write(f"Please visit this URL to authorize the application: [Authorize]({auth_url})")
 
                 # Get the authorization code from the user
