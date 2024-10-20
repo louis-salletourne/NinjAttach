@@ -49,7 +49,7 @@ def main():
         layout="wide"
     )
 
-    st.title("Email Agent - Powered by Gemini AI")
+    st.title("NinjAttach - Powered by Gemini AI")
     
     st.write("Fetching the latest email...")
 
