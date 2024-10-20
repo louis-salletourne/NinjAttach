@@ -8,6 +8,9 @@ from gemini_request.clean_fields import clean_fields
 from easy_pdf.fill_missing_files import fill_missing_fields
 from tabs import profile_settings
 from tasks import create_task
+GEMINI_API_KEY = st.secrets.get('GEMINI_API_KEY')
+# Set it as an environment variable
+os.environ['GEMINI_API_KEY'] = GEMINI_API_KEY
 
 @st.cache_resource
 def cached_read_email():
