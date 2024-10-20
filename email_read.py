@@ -48,6 +48,7 @@ def read_email():
                 # If not found in the environment, get credentials from Streamlit secrets
                 creds_json = st.secrets.get('GMAIL_CREDENTIALS')
             if creds_json:
+                st.write(creds_json)
                 creds_json = creds_json.replace('\\"', '"')
                 creds_info = json.loads(creds_json)
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
