@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
+import streamlit as st
 
 from dotenv import load_dotenv
 import os
@@ -35,12 +36,21 @@ def read_email():
             token_data = json.load(token)
             creds = Credentials.from_authorized_user_info(token_data, SCOPES)
 
+    # If no valid credentials, attempt to get from local env or Streamlit secrets
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
+            # Try to get credentials from the environment for local development
             creds_json = os.environ.get('GMAIL_CREDENTIALS')
-            creds = json.loads(creds_json)
+
+            if not creds_json:
+                # If not found locally, get credentials from Streamlit secrets (for deployment)
+                creds_json = st.secrets.get('GMAIL_CREDENTIALS')
+
+            if creds_json:
+                creds_info = json.loads(creds_json)
+                creds = Credentials.from_authorized_user_info(creds_info)
         # Save the credentials for the next run
         with open('token.json', 'wb') as token:
             token.write(creds.to_json().encode())
