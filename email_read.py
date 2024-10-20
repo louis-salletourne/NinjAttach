@@ -49,7 +49,7 @@ def read_email():
                 creds_json = st.secrets.get('GMAIL_CREDENTIALS')
             if creds_json:
                 st.write(creds_json)
-                creds_json = creds_json.replace('\\"', '"')
+                creds_json = creds_json.replace('\"', '"')
                 creds_info = json.loads(creds_json)
                 flow = InstalledAppFlow.from_client_config(creds_info, SCOPES)
 
