@@ -19,7 +19,7 @@ To run this project, you need to have Python and Streamlit installed. Follow the
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/louis-salletourne/automail.git
+   git clone https://github.com/louis-salletourne/NinjAttach.git
    cd AutoMail
    ```
 
